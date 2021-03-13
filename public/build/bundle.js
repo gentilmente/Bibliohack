@@ -24,6 +24,9 @@ var app = (function () {
     function safe_not_equal(a, b) {
         return a != a ? b == b : a !== b || ((a && typeof a === 'object') || typeof a === 'function');
     }
+    function is_empty(obj) {
+        return Object.keys(obj).length === 0;
+    }
 
     function append(target, node) {
         target.appendChild(node);
@@ -95,6 +98,7 @@ var app = (function () {
                 set_current_component(component);
                 update(component.$$);
             }
+            set_current_component(null);
             dirty_components.length = 0;
             while (binding_callbacks.length)
                 binding_callbacks.pop()();
@@ -135,22 +139,24 @@ var app = (function () {
             block.i(local);
         }
     }
-    function mount_component(component, target, anchor) {
+    function mount_component(component, target, anchor, customElement) {
         const { fragment, on_mount, on_destroy, after_update } = component.$$;
         fragment && fragment.m(target, anchor);
-        // onMount happens before the initial afterUpdate
-        add_render_callback(() => {
-            const new_on_destroy = on_mount.map(run).filter(is_function);
-            if (on_destroy) {
-                on_destroy.push(...new_on_destroy);
-            }
-            else {
-                // Edge case - component was destroyed immediately,
-                // most likely as a result of a binding initialising
-                run_all(new_on_destroy);
-            }
-            component.$$.on_mount = [];
-        });
+        if (!customElement) {
+            // onMount happens before the initial afterUpdate
+            add_render_callback(() => {
+                const new_on_destroy = on_mount.map(run).filter(is_function);
+                if (on_destroy) {
+                    on_destroy.push(...new_on_destroy);
+                }
+                else {
+                    // Edge case - component was destroyed immediately,
+                    // most likely as a result of a binding initialising
+                    run_all(new_on_destroy);
+                }
+                component.$$.on_mount = [];
+            });
+        }
         after_update.forEach(add_render_callback);
     }
     function destroy_component(component, detaching) {
@@ -175,7 +181,6 @@ var app = (function () {
     function init(component, options, instance, create_fragment, not_equal, props, dirty = [-1]) {
         const parent_component = current_component;
         set_current_component(component);
-        const prop_values = options.props || {};
         const $$ = component.$$ = {
             fragment: null,
             ctx: null,
@@ -187,19 +192,21 @@ var app = (function () {
             // lifecycle
             on_mount: [],
             on_destroy: [],
+            on_disconnect: [],
             before_update: [],
             after_update: [],
             context: new Map(parent_component ? parent_component.$$.context : []),
             // everything else
             callbacks: blank_object(),
-            dirty
+            dirty,
+            skip_bound: false
         };
         let ready = false;
         $$.ctx = instance
-            ? instance(component, prop_values, (i, ret, ...rest) => {
+            ? instance(component, options.props || {}, (i, ret, ...rest) => {
                 const value = rest.length ? rest[0] : ret;
                 if ($$.ctx && not_equal($$.ctx[i], $$.ctx[i] = value)) {
-                    if ($$.bound[i])
+                    if (!$$.skip_bound && $$.bound[i])
                         $$.bound[i](value);
                     if (ready)
                         make_dirty(component, i);
@@ -214,8 +221,10 @@ var app = (function () {
         $$.fragment = create_fragment ? create_fragment($$.ctx) : false;
         if (options.target) {
             if (options.hydrate) {
+                const nodes = children(options.target);
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                $$.fragment && $$.fragment.l(children(options.target));
+                $$.fragment && $$.fragment.l(nodes);
+                nodes.forEach(detach);
             }
             else {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -223,11 +232,14 @@ var app = (function () {
             }
             if (options.intro)
                 transition_in(component.$$.fragment);
-            mount_component(component, options.target, options.anchor);
+            mount_component(component, options.target, options.anchor, options.customElement);
             flush();
         }
         set_current_component(parent_component);
     }
+    /**
+     * Base class for Svelte components. Used when dev=false.
+     */
     class SvelteComponent {
         $destroy() {
             destroy_component(this, 1);
@@ -242,58 +254,72 @@ var app = (function () {
                     callbacks.splice(index, 1);
             };
         }
-        $set() {
-            // overridden by instance, if it has props
+        $set($$props) {
+            if (this.$$set && !is_empty($$props)) {
+                this.$$.skip_bound = true;
+                this.$$set($$props);
+                this.$$.skip_bound = false;
+            }
         }
     }
 
     function dispatch_dev(type, detail) {
-        document.dispatchEvent(custom_event(type, Object.assign({ version: '3.19.1' }, detail)));
+        document.dispatchEvent(custom_event(type, Object.assign({ version: '3.35.0' }, detail)));
     }
     function append_dev(target, node) {
-        dispatch_dev("SvelteDOMInsert", { target, node });
+        dispatch_dev('SvelteDOMInsert', { target, node });
         append(target, node);
     }
     function insert_dev(target, node, anchor) {
-        dispatch_dev("SvelteDOMInsert", { target, node, anchor });
+        dispatch_dev('SvelteDOMInsert', { target, node, anchor });
         insert(target, node, anchor);
     }
     function detach_dev(node) {
-        dispatch_dev("SvelteDOMRemove", { node });
+        dispatch_dev('SvelteDOMRemove', { node });
         detach(node);
     }
     function attr_dev(node, attribute, value) {
         attr(node, attribute, value);
         if (value == null)
-            dispatch_dev("SvelteDOMRemoveAttribute", { node, attribute });
+            dispatch_dev('SvelteDOMRemoveAttribute', { node, attribute });
         else
-            dispatch_dev("SvelteDOMSetAttribute", { node, attribute, value });
+            dispatch_dev('SvelteDOMSetAttribute', { node, attribute, value });
     }
     function set_data_dev(text, data) {
         data = '' + data;
-        if (text.data === data)
+        if (text.wholeText === data)
             return;
-        dispatch_dev("SvelteDOMSetData", { node: text, data });
+        dispatch_dev('SvelteDOMSetData', { node: text, data });
         text.data = data;
     }
+    function validate_slots(name, slot, keys) {
+        for (const slot_key of Object.keys(slot)) {
+            if (!~keys.indexOf(slot_key)) {
+                console.warn(`<${name}> received an unexpected slot "${slot_key}".`);
+            }
+        }
+    }
+    /**
+     * Base class for Svelte components with some minor dev-enhancements. Used when dev=true.
+     */
     class SvelteComponentDev extends SvelteComponent {
         constructor(options) {
             if (!options || (!options.target && !options.$$inline)) {
-                throw new Error(`'target' is a required option`);
+                throw new Error("'target' is a required option");
             }
             super();
         }
         $destroy() {
             super.$destroy();
             this.$destroy = () => {
-                console.warn(`Component was already destroyed`); // eslint-disable-line no-console
+                console.warn('Component was already destroyed'); // eslint-disable-line no-console
             };
         }
         $capture_state() { }
         $inject_state() { }
     }
 
-    /* src/App.svelte generated by Svelte v3.19.1 */
+    /* src/App.svelte generated by Svelte v3.35.0 */
 
     const file = "src/App.svelte";
 
@@ -409,6 +435,8 @@ var app = (function () {
     }
 
     function instance($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots("App", slots, []);
     	let { name } = $$props;
     	const writable_props = ["name"];
 
@@ -416,7 +444,7 @@ var app = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<App> was created with unknown prop '${key}'`);
     	});
 
-    	$$self.$set = $$props => {
+    	$$self.$$set = $$props => {
     		if ("name" in $$props) $$invalidate(0, name = $$props.name);
     	};
 
