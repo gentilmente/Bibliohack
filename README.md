@@ -1,6 +1,6 @@
-# Electron Forge + Svelte  Starter
+# Electron Forge + Svelte Starter
 
-Get up and running with 💪 Svelte & ⚡ Electron. 
+Get up and running with 💪 Svelte & ⚡ Electron.
 
 ## Usage
 
@@ -16,8 +16,8 @@ npm start
 
 ## Notes
 
-- src/index.js - Main electron process. 
-- src/svelte.js - Svelte app entrypoint. 
+- src/index.js - Main electron process.
+- src/svelte.js - Svelte app entrypoint.
 
-Setup [Electron with Svelte](https://fireship.io/snippets/svelte-electron-setup) from scratch. 
-Build cool projects with [Electron](https://fireship.io/tags/electron). 
+Setup [Electron with Svelte](https://fireship.io/snippets/svelte-electron-setup) from scratch.
+Build cool projects with [Electron](https://fireship.io/tags/electron).
