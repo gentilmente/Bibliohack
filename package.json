@@ -1,22 +1,20 @@
 {
   "name": "svelte-electron-forge",
-  "productName": "svelte-electron-forge",
-  "version": "1.0.0",
   "description": "Svelte + Electron Forge",
+  "license": "MIT",
+  "author": "jeffd23",
+  "version": "1.0.0",
   "main": "src/index.js",
   "scripts": {
-    "start": "concurrently \"npm:svelte-dev\" \"electron-forge start\"",
-    "package": "electron-forge package",
-    "make": "electron-forge make",
-    "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\"",
+    "make": "electron-forge make",
+    "package": "electron-forge package",
+    "publish": "electron-forge publish",
+    "start": "concurrently \"npm:svelte-dev\" \"electron-forge start\"",
     "svelte-build": "rollup -c",
     "svelte-dev": "rollup -c -w",
     "svelte-start": "sirv public"
   },
-  "keywords": [],
-  "author": "jeffd23",
-  "license": "MIT",
   "config": {
     "forge": {
       "packagerConfig": {},
@@ -47,8 +45,8 @@
   "dependencies": {
     "electron-reload": "^1.5.0",
     "electron-squirrel-startup": "^1.0.0",
-    "sirv-cli": "^1.0.0",
-    "svelte-preprocess": "^4.6.9"
+    "postcss": "^8.2.4",
+    "postcss-import": "^14.0.0"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.54",
@@ -60,10 +58,15 @@
     "@rollup/plugin-node-resolve": "^11.0.0",
     "concurrently": "^6.0.0",
     "electron": "12.0.1",
-    "rollup": "^2.0.0",
+    "rollup": "^2.42.1",
+    "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-svelte": "^6.0.0",
-    "rollup-plugin-terser": "^6.0.0",
-    "svelte": "^3.35.0"
-  }
+    "rollup-plugin-svelte": "^7.0.0",
+    "rollup-plugin-terser": "^7.0.0",
+    "sirv-cli": "^1.0.11",
+    "svelte": "^3.35.0",
+    "svelte-preprocess": "^4.6.9"
+  },
+  "keywords": [],
+  "productName": "svelte-electron-forge"
 }

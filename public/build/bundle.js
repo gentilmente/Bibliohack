@@ -402,7 +402,7 @@ var app = (function () {
     			t4 = space();
     			div5 = element("div");
     			p = element("p");
-    			p.textContent = "Bibliohack";
+    			p.textContent = "Here goes the camera live view";
     			t6 = space();
     			button = element("button");
     			span = element("span");
@@ -419,13 +419,12 @@ var app = (function () {
     			add_location(div3, file$1, 6, 0, 114);
     			attr_dev(div4, "id", "live");
     			add_location(div4, file$1, 7, 0, 133);
-    			attr_dev(p, "class", "svelte-e5cqip");
+    			attr_dev(p, "class", "svelte-1qvevq3");
     			add_location(p, file$1, 9, 2, 173);
-    			add_location(span, file$1, 11, 4, 223);
-    			attr_dev(button, "id", "bt");
-    			attr_dev(button, "class", "svelte-e5cqip");
-    			add_location(button, file$1, 10, 2, 193);
-    			attr_dev(div5, "class", "intro svelte-e5cqip");
+    			add_location(span, file$1, 11, 4, 235);
+    			attr_dev(button, "class", "svelte-1qvevq3");
+    			add_location(button, file$1, 10, 2, 213);
+    			attr_dev(div5, "class", "intro svelte-1qvevq3");
     			add_location(div5, file$1, 8, 0, 151);
     		},
     		l: function claim(nodes) {
@@ -525,10 +524,7 @@ var app = (function () {
     	let t2;
     	let t3;
     	let p;
-    	let t4;
-    	let a;
-    	let t6;
-    	let t7;
+    	let t5;
     	let frame;
     	let current;
     	frame = new Frame({ $$inline: true });
@@ -542,16 +538,12 @@ var app = (function () {
     			t2 = text("!");
     			t3 = space();
     			p = element("p");
-    			t4 = text("Visit the ");
-    			a = element("a");
-    			a.textContent = "Svelte tutorial";
-    			t6 = text(" to learn\n    how to build Svelte apps.");
-    			t7 = space();
+    			p.textContent = "We came to solve your digitalization process";
+    			t5 = space();
     			create_component(frame.$$.fragment);
     			add_location(h1, file, 7, 2, 111);
-    			attr_dev(a, "href", "https://svelte.dev/tutorial");
-    			add_location(a, file, 9, 14, 154);
     			add_location(p, file, 8, 2, 136);
+    			attr_dev(main, "class", "svelte-1gfrbw6");
     			add_location(main, file, 6, 0, 102);
     		},
     		l: function claim(nodes) {
@@ -565,10 +557,7 @@ var app = (function () {
     			append_dev(h1, t2);
     			append_dev(main, t3);
     			append_dev(main, p);
-    			append_dev(p, t4);
-    			append_dev(p, a);
-    			append_dev(p, t6);
-    			append_dev(main, t7);
+    			append_dev(main, t5);
     			mount_component(frame, main, null);
     			current = true;
     		},
@@ -667,4 +656,3 @@ var app = (function () {
     return app;
 
 }());
-//# sourceMappingURL=bundle.js.map

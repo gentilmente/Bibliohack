@@ -7,14 +7,14 @@
 <div id="flash" />
 <div id="live" />
 <div class="intro">
-  <p>Bibliohack</p>
-  <button id="bt" on:click>
+  <p>Here goes the camera live view</p>
+  <button on:click>
     <span>Capturar</span>
   </button>
 </div>
 
 <style>
-  #bt {
+  .intro button {
     display: inline-block;
     border-radius: 4px;
     background-color: #f4511e;
@@ -29,5 +29,11 @@
 
   .intro p {
     margin-top: 5em;
+  }
+  p {
+    background-color: black;
+    text-align: justify;
+    width: auto;
+    height: 100px;
   }
 </style>

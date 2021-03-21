@@ -26,9 +26,9 @@ import $ from "jquery";
 import "popper.js";
 import "bootstrap"; */
 
-import utils from "./utils.js";
+import utils from "../utils.js";
 import camera from "./camera.js";
-import LivePreview from "./live-preview.js";
+import LivePreview from "../live-preview.js";
 import {
   SpinnerPrompt,
   CountdownPrompt,
@@ -36,8 +36,8 @@ import {
   CameraErrorPrompt,
   CameraErrorOnStartupPrompt,
   SharpErrorPrompt,
-} from "./prompt.js";
-import slideshow from "./slideshow.js";
+} from "../prompt.js";
+import slideshow from "../slideshow.js";
 
 //import webApp from "./webapp_server.js";
 
@@ -124,7 +124,7 @@ let seriesCounter = 0;
 
 function trigger(callback) {
   if (callback === undefined) {
-    callback = function () {};
+    callback = function () { };
   }
 
   if (executing) {
